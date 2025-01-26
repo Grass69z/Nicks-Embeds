@@ -24,12 +24,11 @@ const elements = {
     savedList: document.getElementById('savedList'),
     adblockToggle: document.getElementById('adblockToggle'),
     darkModeToggle: document.getElementById('darkModeToggle'),
-    embedButton: document.getElementById('embedButton'),
-    saveButton: document.getElementById('saveButton'),
+    embedButton: document.getElementById('embedButton'), // Must match HTML
+    saveButton: document.getElementById('saveButton'), // Must match HTML
     embedTitle: document.getElementById('embedTitle'),
     ddgSearchForm: document.getElementById('ddgSearchForm'),
-    ddgSearchInput: document.getElementById('ddgSearchInput'),
-    proxyHelp: document.getElementById('proxyHelp')
+    ddgSearchInput: document.getElementById('ddgSearchInput')
 };
 
 function initApp() {
