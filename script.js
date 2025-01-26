@@ -292,3 +292,5 @@ function deleteEmbed(index) {
 }
 
 initApp();
+window.loadEmbed = loadEmbed;
+window.deleteEmbed = deleteEmbed;
