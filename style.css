@@ -33,8 +33,8 @@ body.dark-mode {
 }
 
 .dark-mode .input-group,
-.dark-mode .game-container,
-.dark-mode .saved-games,
+.dark-mode .embed-container,
+.dark-mode .saved-embed,
 .dark-mode .search-group,
 .dark-mode .search-results {
     background-color: #2d2d2d;
@@ -52,11 +52,11 @@ body.dark-mode {
     background-color: #555;
 }
 
-.dark-mode .saved-game-item {
+.dark-mode .saved-embed-item {
     background-color: #3a3a3a;
 }
 
-.dark-mode .saved-game-item:hover {
+.dark-mode .saved-embed-item:hover {
     background-color: #4a4a4a;
 }
 
