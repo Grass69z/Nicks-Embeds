@@ -238,3 +238,64 @@ button:hover {
     background: rgba(255, 255, 255, 0.1);
     color: #fff;
 }
+/* Search Results Styling */
+.search-result {
+    margin: 15px 0;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.search-result a {
+    color: #1a0dab;
+    text-decoration: none;
+    font-size: 1.1em;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.search-result a:hover {
+    text-decoration: underline;
+}
+
+.copy-button {
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 10px;
+    font-size: 0.9em;
+}
+
+.copy-button:hover {
+    background: #e0e0e0;
+}
+
+.snippet {
+    color: #545454;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+/* Dark Mode Adjustments */
+.dark-mode .search-result {
+    border-color: #444;
+}
+
+.dark-mode .search-result a {
+    color: #8ab4f8;
+}
+
+.dark-mode .snippet {
+    color: #bdc1c6;
+}
+
+.dark-mode .copy-button {
+    background: #444;
+    border-color: #666;
+    color: #fff;
+}
+
+.dark-mode .copy-button:hover {
+    background: #555;
+}
