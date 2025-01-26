@@ -80,18 +80,14 @@ function embed() {
     showElement(elements.embedContainer);
     hideElement(elements.searchResults);
 
-        // Get and clean the URL
     let url = elements.embedUrl.value.trim();
     if (!url) return alert('Please enter a URL');
 
     // Auto-add https:// if missing
     if (!/^https?:\/\//i.test(url)) {
         url = `https://${url}`;
-        elements.embedUrl.value = url; // Update input field
+        elements.embedUrl.value = url;
     }
-    
-    const url = elements.embedUrl.value;
-    if (!url) return alert('Please enter a URL');
 
     try {
         if (isBlocked(url)) return alert('Content blocked by AdBlock');
@@ -111,7 +107,6 @@ function embed() {
         elements.embedContainer.appendChild(iframe);
         elements.embedContainer.appendChild(fullscreenBtn);
 
-        // Add resize observer for centering
         const resizeObserver = new ResizeObserver(() => {
             iframe.style.margin = 'auto';
         });
@@ -164,11 +159,9 @@ async function handleSearch(e) {
                 const resultDiv = document.createElement('div');
                 resultDiv.className = 'search-result';
 
-                // Extract actual destination URL from DuckDuckGo's redirect
                 const url = new URL(link.href);
                 const realUrl = decodeURIComponent(url.searchParams.get('uddg') || link.href);
 
-                // Create clickable title
                 const titleLink = document.createElement('a');
                 titleLink.href = '#';
                 titleLink.textContent = link.textContent;
@@ -181,7 +174,6 @@ async function handleSearch(e) {
                     hideElement(elements.searchResults);
                 });
 
-                // Copy button
                 const copyButton = document.createElement('button');
                 copyButton.className = 'copy-button';
                 copyButton.textContent = 'Copy URL';
@@ -191,7 +183,6 @@ async function handleSearch(e) {
                         .catch(console.error);
                 };
 
-                // Snippet
                 const snippetDiv = document.createElement('div');
                 snippetDiv.className = 'snippet';
                 snippetDiv.textContent = snippet?.textContent || '';
@@ -218,18 +209,16 @@ function hideElement(element) {
 
 function saveEmbed() {
     let url = elements.embedUrl.value.trim();
-    const url = elements.embedUrl.value;
-    const title = elements.embedTitle.value || new URL(url).hostname;
+    if (!url) return alert('No embed to save');
 
-// Auto-add https:// if missing
+    // Auto-add https:// if missing
     if (!/^https?:\/\//i.test(url)) {
         url = `https://${url}`;
-        elements.embedUrl.value = url; // Update input field
+        elements.embedUrl.value = url;
     }
     
     const title = elements.embedTitle.value || new URL(url).hostname;
     
-    if (!url) return alert('No embed to save');
     if (savedEmbeds.some(e => e.url === url)) return alert('Already saved');
 
     savedEmbeds.push({ title, url, date: new Date().toISOString() });
