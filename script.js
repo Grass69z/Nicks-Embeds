@@ -4,7 +4,9 @@ const config = {
         blockedDomains: [
             'doubleclick.net', 'googleads.com', 'googlesyndication.com',
             'adservice.google.com', 'ads.youtube.com', 'adserver.com',
-            'tracking.com', 'advertising.com', 'taboola.com', 'outbrain.com'
+            'tracking.com', 'advertising.com', 'taboola.com', 'outbrain.com',
+            'googletagmanager.com', 'facebook.net', 'analytics.google.com',
+            'hotjar.com', 'adsrvr.org', 'adnxs.com'
         ],
         blockedPaths: ['/ad', '/ads', '/track', '/analytics']
     },
