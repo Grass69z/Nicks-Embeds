@@ -1,0 +1,240 @@
+/* Base Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f0f0;
+    color: #333;
+    transition: background-color 0.3s, color 0.3s;
+    overflow-x: hidden;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+    background-color: #1a1a1a;
+    color: #f0f0f0;
+}
+
+.dark-mode .input-group,
+.dark-mode .game-container,
+.dark-mode .saved-games,
+.dark-mode .search-group,
+.dark-mode .search-results {
+    background-color: #2d2d2d;
+    box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode input[type="text"],
+.dark-mode button {
+    background-color: #444;
+    color: #f0f0f0;
+    border-color: #666;
+}
+
+.dark-mode button:hover {
+    background-color: #555;
+}
+
+.dark-mode .saved-game-item {
+    background-color: #3a3a3a;
+}
+
+.dark-mode .saved-game-item:hover {
+    background-color: #4a4a4a;
+}
+
+.dark-mode .note {
+    color: #aaa;
+}
+
+/* Dark Mode Toggle */
+.dark-mode-toggle {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px;
+    transition: transform 0.3s;
+}
+
+.dark-mode-toggle:hover {
+    transform: scale(1.1);
+}
+
+/* Input Groups */
+.input-group, .search-group {
+    margin-bottom: 20px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+input[type="text"] {
+    width: 70%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+/* Game Container */
+.game-container {
+    width: 100%;
+    height: 600px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.game-container:fullscreen {
+    width: 100vw !important;
+    height: 100vh !important;
+    border-radius: 0;
+    background: black;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-container:fullscreen iframe {
+    max-width: 100%;
+    max-height: 100%;
+    position: relative;
+}
+
+/* Search Results */
+.search-results {
+    width: 100%;
+    height: 600px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: none;
+    overflow: auto;
+    padding: 20px;
+}
+
+/* Saved Games */
+.saved-games {
+    margin-top: 20px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.saved-game-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin: 5px 0;
+    background: #f8f8f8;
+    border-radius: 4px;
+}
+
+.saved-game-item:hover {
+    background: #eee;
+}
+
+.delete-btn {
+    background-color: #ff4444;
+}
+
+.delete-btn:hover {
+    background-color: #cc0000;
+}
+
+/* AdBlock Toggle */
+.adblock-toggle {
+    background-color: #2196F3;
+}
+
+.adblock-toggle.active {
+    background-color: #4CAF50;
+}
+
+/* Search Section */
+#ddgSearchForm {
+    display: flex;
+    gap: 10px;
+}
+
+#ddgSearchInput {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+}
+
+/* Fullscreen Button */
+.fullscreen-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1001;
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    backdrop-filter: blur(2px);
+    transition: opacity 0.3s;
+}
+
+.fullscreen-btn:hover {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.dark-mode .fullscreen-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
