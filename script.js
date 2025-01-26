@@ -140,12 +140,10 @@ async function handleSearch(e) {
         const response = await fetch(proxyUrl);
         const data = await response.json();
         
-        // Parse HTML results
         const parser = new DOMParser();
         const doc = parser.parseFromString(data.contents, 'text/html');
         elements.searchResults.innerHTML = '';
 
-        // Process each search result
         doc.querySelectorAll('.result').forEach(result => {
             const link = result.querySelector('.result__a');
             const snippet = result.querySelector('.result__snippet');
@@ -154,13 +152,21 @@ async function handleSearch(e) {
                 const resultDiv = document.createElement('div');
                 resultDiv.className = 'search-result';
 
-                // Title Link
+                // Modified link handling
                 const titleLink = document.createElement('a');
-                titleLink.href = link.href;
-                titleLink.target = '_blank';
+                titleLink.href = '#';
                 titleLink.textContent = link.textContent;
+                
+                // Click handler to load in embed
+                titleLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    elements.embedUrl.value = link.href;
+                    embed();
+                    hideElement(elements.searchResults);
+                    showElement(elements.embedContainer);
+                });
 
-                // Copy Button
+                // Keep copy button
                 const copyButton = document.createElement('button');
                 copyButton.className = 'copy-button';
                 copyButton.textContent = 'Copy URL';
@@ -170,7 +176,6 @@ async function handleSearch(e) {
                         .catch(console.error);
                 };
 
-                // Snippet
                 const snippetDiv = document.createElement('div');
                 snippetDiv.className = 'snippet';
                 snippetDiv.textContent = snippet?.textContent || '';
