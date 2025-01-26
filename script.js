@@ -79,6 +79,16 @@ function isBlocked(url) {
 function embed() {
     showElement(elements.embedContainer);
     hideElement(elements.searchResults);
+
+        // Get and clean the URL
+    let url = elements.embedUrl.value.trim();
+    if (!url) return alert('Please enter a URL');
+
+    // Auto-add https:// if missing
+    if (!/^https?:\/\//i.test(url)) {
+        url = `https://${url}`;
+        elements.embedUrl.value = url; // Update input field
+    }
     
     const url = elements.embedUrl.value;
     if (!url) return alert('Please enter a URL');
@@ -207,7 +217,16 @@ function hideElement(element) {
 }
 
 function saveEmbed() {
+    let url = elements.embedUrl.value.trim();
     const url = elements.embedUrl.value;
+    const title = elements.embedTitle.value || new URL(url).hostname;
+
+// Auto-add https:// if missing
+    if (!/^https?:\/\//i.test(url)) {
+        url = `https://${url}`;
+        elements.embedUrl.value = url; // Update input field
+    }
+    
     const title = elements.embedTitle.value || new URL(url).hostname;
     
     if (!url) return alert('No embed to save');
