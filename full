@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Embedder Pro</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+            color: #333;
+            transition: background-color 0.3s, color 0.3s;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        body.dark-mode {
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+        }
+
+        .dark-mode .input-group,
+        .dark-mode .game-container,
+        .dark-mode .saved-games,
+        .dark-mode .search-group,
+        .dark-mode .search-results {
+            background-color: #2d2d2d;
+            box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+        }
+
+        .dark-mode input[type="text"],
+        .dark-mode button {
+            background-color: #444;
+            color: #f0f0f0;
+            border-color: #666;
+        }
+
+        .dark-mode button:hover {
+            background-color: #555;
+        }
+
+        .dark-mode .saved-game-item {
+            background-color: #3a3a3a;
+        }
+
+        .dark-mode .saved-game-item:hover {
+            background-color: #4a4a4a;
+        }
+
+        .dark-mode .note {
+            color: #aaa;
+        }
+
+        .dark-mode-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            transition: transform 0.3s;
+        }
+
+        .dark-mode-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .input-group, .search-group {
+            margin-bottom: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        input[type="text"] {
+            width: 70%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .game-container {
+            width: 100%;
+            height: 600px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .game-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .game-container:fullscreen {
+            width: 100vw !important;
+            height: 100vh !important;
+            border-radius: 0;
+            background: black;
+            display: flex !important;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .game-container:fullscreen iframe {
+            max-width: 100%;
+            max-height: 100%;
+            position: relative;
+        }
+
+        .search-results {
+            width: 100%;
+            height: 600px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: none;
+            overflow: auto;
+            padding: 20px;
+        }
+
+        .saved-games {
+            margin-top: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .saved-game-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f8f8;
+            border-radius: 4px;
+        }
+
+        .saved-game-item:hover {
+            background: #eee;
+        }
+
+        .delete-btn {
+            background-color: #ff4444;
+        }
+
+        .delete-btn:hover {
+            background-color: #cc0000;
+        }
+
+        .adblock-toggle {
+            background-color: #2196F3;
+        }
+
+        .adblock-toggle.active {
+            background-color: #4CAF50;
+        }
+
+        #ddgSearchForm {
+            display: flex;
+            gap: 10px;
+        }
+
+        #ddgSearchInput {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        .fullscreen-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            backdrop-filter: blur(2px);
+            transition: opacity 0.3s;
+        }
+
+        .fullscreen-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .dark-mode .fullscreen-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Game Embedder Pro</h1>
+            <div class="controls">
+                <button id="adblockToggle" class="adblock-toggle">AdBlock: ON</button>
+                <button id="darkModeToggle" class="dark-mode-toggle">🌙</button>
+            </div>
+        </div>
+
+        <div class="search-group">
+            <form id="ddgSearchForm">
+                <input type="text" id="ddgSearchInput" placeholder="Search via DuckDuckGo...">
+                <button type="submit">🔍</button>
+            </form>
+        </div>
+
+        <div class="input-group">
+            <input type="text" id="gameUrl" placeholder="Paste game URL here...">
+            <button id="embedButton">Embed Game</button>
+            <button id="saveButton">Save Embed</button>
+            <input type="text" id="embedTitle" placeholder="Custom title (optional)">
+            <div class="note">Saved embeds persist between sessions</div>
+        </div>
+
+        <div class="game-container" id="gameContainer"></div>
+        <div class="search-results" id="searchResults"></div>
+
+        <div class="saved-games">
+            <h2>Saved Games</h2>
+            <div id="savedList"></div>
+        </div>
+    </div>
+
+    <script>
+        const config = {
+            adBlock: {
+                enabled: localStorage.getItem('adBlockEnabled') !== 'false',
+                blockedDomains: [
+                    'doubleclick.net', 'googleads.com', 'googlesyndication.com',
+                    'adservice.google.com', 'ads.youtube.com', 'adserver.com',
+                    'tracking.com', 'advertising.com', 'taboola.com', 'outbrain.com'
+                ],
+                blockedPaths: ['/ad', '/ads', '/track', '/analytics']
+            },
+            darkMode: localStorage.getItem('darkModeEnabled') === 'true'
+        };
+
+        let savedEmbeds = JSON.parse(localStorage.getItem('savedEmbeds')) || [];
+
+        const elements = {
+            gameUrl: document.getElementById('gameUrl'),
+            gameContainer: document.getElementById('gameContainer'),
+            searchResults: document.getElementById('searchResults'),
+            savedList: document.getElementById('savedList'),
+            adblockToggle: document.getElementById('adblockToggle'),
+            darkModeToggle: document.getElementById('darkModeToggle'),
+            embedButton: document.getElementById('embedButton'),
+            saveButton: document.getElementById('saveButton'),
+            embedTitle: document.getElementById('embedTitle'),
+            ddgSearchForm: document.getElementById('ddgSearchForm'),
+            ddgSearchInput: document.getElementById('ddgSearchInput')
+        };
+
+        function initApp() {
+            initDarkMode();
+            updateSavedList();
+            updateAdBlockToggle();
+            addEventListeners();
+        }
+
+        function addEventListeners() {
+            elements.embedButton.addEventListener('click', embedGame);
+            elements.saveButton.addEventListener('click', saveEmbed);
+            elements.adblockToggle.addEventListener('click', toggleAdBlock);
+            elements.darkModeToggle.addEventListener('click', toggleDarkMode);
+            elements.gameUrl.addEventListener('keypress', e => e.key === 'Enter' && embedGame());
+            elements.ddgSearchForm.addEventListener('submit', handleSearch);
+        }
+
+        function toggleDarkMode() {
+            config.darkMode = !config.darkMode;
+            localStorage.setItem('darkModeEnabled', config.darkMode);
+            document.body.classList.toggle('dark-mode', config.darkMode);
+            elements.darkModeToggle.textContent = config.darkMode ? '☀️' : '🌙';
+        }
+
+        function initDarkMode() {
+            document.body.classList.toggle('dark-mode', config.darkMode);
+            elements.darkModeToggle.textContent = config.darkMode ? '☀️' : '🌙';
+        }
+
+        function toggleAdBlock() {
+            config.adBlock.enabled = !config.adBlock.enabled;
+            localStorage.setItem('adBlockEnabled', config.adBlock.enabled);
+            elements.adblockToggle.textContent = `AdBlock: ${config.adBlock.enabled ? 'ON' : 'OFF'}`;
+            elements.adblockToggle.classList.toggle('active', config.adBlock.enabled);
+        }
+
+        function updateAdBlockToggle() {
+            elements.adblockToggle.textContent = `AdBlock: ${config.adBlock.enabled ? 'ON' : 'OFF'}`;
+            elements.adblockToggle.classList.toggle('active', config.adBlock.enabled);
+        }
+
+        function isBlocked(url) {
+            if (!config.adBlock.enabled) return false;
+            const { hostname, pathname } = new URL(url);
+            return config.adBlock.blockedDomains.some(d => hostname.includes(d)) ||
+                   config.adBlock.blockedPaths.some(p => pathname.includes(p));
+        }
+
+        function embedGame() {
+            showElement(elements.gameContainer);
+            hideElement(elements.searchResults);
+            
+            const url = elements.gameUrl.value;
+            if (!url) return alert('Please enter a URL');
+
+            try {
+                if (isBlocked(url)) return alert('Content blocked by AdBlock');
+                const iframe = document.createElement('iframe');
+                iframe.src = url;
+                iframe.allow = "fullscreen";
+                iframe.style.width = "100%";
+                iframe.style.height = "100%";
+                iframe.style.border = "none";
+                
+                const fullscreenBtn = document.createElement('button');
+                fullscreenBtn.className = 'fullscreen-btn';
+                fullscreenBtn.innerHTML = '⛶';
+                fullscreenBtn.onclick = toggleFullscreen;
+
+                elements.gameContainer.innerHTML = '';
+                elements.gameContainer.appendChild(iframe);
+                elements.gameContainer.appendChild(fullscreenBtn);
+
+                // Add resize observer for centering
+                const resizeObserver = new ResizeObserver(() => {
+                    iframe.style.margin = 'auto';
+                });
+                resizeObserver.observe(elements.gameContainer);
+
+                document.addEventListener('fullscreenchange', updateFullscreenButton);
+
+            } catch {
+                alert('Invalid URL');
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                elements.gameContainer.requestFullscreen().catch(err => {
+                    alert(`Fullscreen error: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function updateFullscreenButton() {
+            const btn = document.querySelector('.fullscreen-btn');
+            btn.innerHTML = document.fullscreenElement ? '⛶' : '⛶';
+        }
+
+        async function handleSearch(e) {
+            e.preventDefault();
+            const query = elements.ddgSearchInput.value.trim();
+            if (!query) return;
+
+            try {
+                showElement(elements.searchResults);
+                hideElement(elements.gameContainer);
+                
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://duckduckgo.com/html/?q=${query}`)}`;
+                const response = await fetch(proxyUrl);
+                const data = await response.json();
+                
+                elements.searchResults.innerHTML = `
+                    <style>
+                        .search-result { margin: 15px 0; padding: 10px; border-bottom: 1px solid #ddd; }
+                        .search-result a { color: #1a0dab; text-decoration: none; }
+                        .search-result .snippet { color: #545454; font-size: 14px; }
+                        .dark-mode .search-result { border-color: #444; }
+                        .dark-mode .search-result a { color: #8ab4f8; }
+                        .dark-mode .search-result .snippet { color: #bdc1c6; }
+                    </style>
+                    ${data.contents}
+                `;
+                
+                elements.searchResults.querySelectorAll('a').forEach(link => {
+                    const originalHref = link.href;
+                    link.href = '#';
+                    link.onclick = () => {
+                        elements.ddgSearchInput.value = originalHref;
+                        handleSearch(e);
+                        return false;
+                    };
+                });
+            } catch (error) {
+                alert('Search failed. Please try again.');
+            }
+        }
+
+        function showElement(element) {
+            element.style.display = 'block';
+        }
+
+        function hideElement(element) {
+            element.style.display = 'none';
+        }
+
+        function saveEmbed() {
+            const url = elements.gameUrl.value;
+            const title = elements.embedTitle.value || new URL(url).hostname;
+            
+            if (!url) return alert('No game to save');
+            if (savedEmbeds.some(e => e.url === url)) return alert('Already saved');
+
+            savedEmbeds.push({ title, url, date: new Date().toISOString() });
+            localStorage.setItem('savedEmbeds', JSON.stringify(savedEmbeds));
+            updateSavedList();
+        }
+
+        function updateSavedList() {
+            elements.savedList.innerHTML = savedEmbeds.map((embed, index) => `
+                <div class="saved-game-item">
+                    <span>${embed.title}</span>
+                    <div>
+                        <button onclick="loadEmbed(${index})">Load</button>
+                        <button class="delete-btn" onclick="deleteEmbed(${index})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadEmbed(index) {
+            elements.gameUrl.value = savedEmbeds[index].url;
+            embedGame();
+        }
+
+        function deleteEmbed(index) {
+            if (confirm('Delete this saved game?')) {
+                savedEmbeds.splice(index, 1);
+                localStorage.setItem('savedEmbeds', JSON.stringify(savedEmbeds));
+                updateSavedList();
+            }
+        }
+
+        initApp();
+    </script>
+</body>
+</html>
