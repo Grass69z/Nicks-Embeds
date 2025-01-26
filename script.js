@@ -14,8 +14,8 @@ const config = {
 let savedEmbeds = JSON.parse(localStorage.getItem('savedEmbeds')) || [];
 
 const elements = {
-    gameUrl: document.getElementById('gameUrl'),
-    gameContainer: document.getElementById('gameContainer'),
+    embedUrl: document.getElementById('embedUrl'),
+    embedContainer: document.getElementById('embedContainer'),
     searchResults: document.getElementById('searchResults'),
     savedList: document.getElementById('savedList'),
     adblockToggle: document.getElementById('adblockToggle'),
@@ -175,10 +175,10 @@ function hideElement(element) {
 }
 
 function saveEmbed() {
-    const url = elements.gameUrl.value;
+    const url = elements.embedUrl.value;
     const title = elements.embedTitle.value || new URL(url).hostname;
     
-    if (!url) return alert('No game to save');
+    if (!url) return alert('No embed to save');
     if (savedEmbeds.some(e => e.url === url)) return alert('Already saved');
 
     savedEmbeds.push({ title, url, date: new Date().toISOString() });
@@ -188,7 +188,7 @@ function saveEmbed() {
 
 function updateSavedList() {
     elements.savedList.innerHTML = savedEmbeds.map((embed, index) => `
-        <div class="saved-game-item">
+        <div class="saved-embed-item">
             <span>${embed.title}</span>
             <div>
                 <button onclick="loadEmbed(${index})">Load</button>
@@ -199,12 +199,12 @@ function updateSavedList() {
 }
 
 function loadEmbed(index) {
-    elements.gameUrl.value = savedEmbeds[index].url;
-    embedGame();
+    elements.embedUrl.value = savedEmbeds[index].url;
+    embed();
 }
 
 function deleteEmbed(index) {
-    if (confirm('Delete this saved game?')) {
+    if (confirm('Delete this saved embed?')) {
         savedEmbeds.splice(index, 1);
         localStorage.setItem('savedEmbeds', JSON.stringify(savedEmbeds));
         updateSavedList();
