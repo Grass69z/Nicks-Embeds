@@ -104,10 +104,10 @@ function embed() {
         elements.embedUrl.value = url;
     }
 
-try {
+    try {
         if (isBlocked(url)) return alert('Content blocked by AdBlock');
         
-        // === Add proxy code here ===
+        // Use your Vercel proxy
         const proxyUrl = `https://nicks-embeds.vercel.app/?url=${encodeURIComponent(url)}`;
         const iframe = document.createElement('iframe');
         iframe.src = proxyUrl;
@@ -116,6 +116,14 @@ try {
         iframe.style.width = "100%";
         iframe.style.height = "100%";
         iframe.style.border = "none";
+        
+        // Clear previous embed and add new one
+        elements.embedContainer.innerHTML = '';
+        elements.embedContainer.appendChild(iframe);
+    } catch {
+        alert('Invalid URL');
+    }
+}
         
         const fullscreenBtn = document.createElement('button');
         fullscreenBtn.className = 'fullscreen-btn';
