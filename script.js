@@ -140,27 +140,48 @@ async function handleSearch(e) {
         const response = await fetch(proxyUrl);
         const data = await response.json();
         
-        elements.searchResults.innerHTML = `
-            <style>
-                .search-result { margin: 15px 0; padding: 10px; border-bottom: 1px solid #ddd; }
-                .search-result a { color: #1a0dab; text-decoration: none; }
-                .search-result .snippet { color: #545454; font-size: 14px; }
-                .dark-mode .search-result { border-color: #444; }
-                .dark-mode .search-result a { color: #8ab4f8; }
-                .dark-mode .search-result .snippet { color: #bdc1c6; }
-            </style>
-            ${data.contents}
-        `;
-        
-        elements.searchResults.querySelectorAll('a').forEach(link => {
-            const originalHref = link.href;
-            link.href = '#';
-            link.onclick = () => {
-                elements.ddgSearchInput.value = originalHref;
-                handleSearch(e);
-                return false;
-            };
+        // Parse HTML results
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(data.contents, 'text/html');
+        elements.searchResults.innerHTML = '';
+
+        // Process each search result
+        doc.querySelectorAll('.result').forEach(result => {
+            const link = result.querySelector('.result__a');
+            const snippet = result.querySelector('.result__snippet');
+
+            if (link && link.href) {
+                const resultDiv = document.createElement('div');
+                resultDiv.className = 'search-result';
+
+                // Title Link
+                const titleLink = document.createElement('a');
+                titleLink.href = link.href;
+                titleLink.target = '_blank';
+                titleLink.textContent = link.textContent;
+
+                // Copy Button
+                const copyButton = document.createElement('button');
+                copyButton.className = 'copy-button';
+                copyButton.textContent = 'Copy URL';
+                copyButton.onclick = () => {
+                    navigator.clipboard.writeText(link.href)
+                        .then(() => alert('URL copied to clipboard!'))
+                        .catch(console.error);
+                };
+
+                // Snippet
+                const snippetDiv = document.createElement('div');
+                snippetDiv.className = 'snippet';
+                snippetDiv.textContent = snippet?.textContent || '';
+
+                resultDiv.appendChild(titleLink);
+                resultDiv.appendChild(copyButton);
+                resultDiv.appendChild(snippetDiv);
+                elements.searchResults.appendChild(resultDiv);
+            }
         });
+
     } catch (error) {
         alert('Search failed. Please try again.');
     }
