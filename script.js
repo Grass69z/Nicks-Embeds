@@ -152,30 +152,34 @@ async function handleSearch(e) {
                 const resultDiv = document.createElement('div');
                 resultDiv.className = 'search-result';
 
-                // Modified link handling
+                // Extract actual destination URL from DuckDuckGo's redirect
+                const url = new URL(link.href);
+                const realUrl = decodeURIComponent(url.searchParams.get('uddg') || link.href);
+
+                // Create clickable title
                 const titleLink = document.createElement('a');
                 titleLink.href = '#';
                 titleLink.textContent = link.textContent;
                 
-                // Click handler to load in embed
                 titleLink.addEventListener('click', (e) => {
                     e.preventDefault();
-                    elements.embedUrl.value = link.href;
+                    if (isBlocked(realUrl)) return alert('Content blocked by AdBlock');
+                    elements.embedUrl.value = realUrl;
                     embed();
                     hideElement(elements.searchResults);
-                    showElement(elements.embedContainer);
                 });
 
-                // Keep copy button
+                // Copy button
                 const copyButton = document.createElement('button');
                 copyButton.className = 'copy-button';
                 copyButton.textContent = 'Copy URL';
                 copyButton.onclick = () => {
-                    navigator.clipboard.writeText(link.href)
+                    navigator.clipboard.writeText(realUrl)
                         .then(() => alert('URL copied to clipboard!'))
                         .catch(console.error);
                 };
 
+                // Snippet
                 const snippetDiv = document.createElement('div');
                 snippetDiv.className = 'snippet';
                 snippetDiv.textContent = snippet?.textContent || '';
