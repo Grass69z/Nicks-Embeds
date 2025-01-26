@@ -64,7 +64,7 @@ function toggleAdBlock() {
     config.adBlock.enabled = !config.adBlock.enabled;
     localStorage.setItem('adBlockEnabled', config.adBlock.enabled);
     elements.adblockToggle.textContent = `AdBlock: ${config.adBlock.enabled ? 'ON' : 'OFF'}`;
-    elements.adblockToggle.classList.toggle('active', config.adBlock.enabled);
+    elements.adblockToggle.classList.toggle('active', config.adBlock.enabled); // Add this line
 }
 
 function toggleProxy(e) {
@@ -170,7 +170,7 @@ function toggleFullscreen() {
 
 function updateFullscreenButton() {
     const btn = document.querySelector('.fullscreen-btn');
-    btn.innerHTML = document.fullscreenElement ? '⛶' : '⛶';
+    btn.innerHTML = document.fullscreenElement ? '⛶ Exit' : '⛶ Fullscreen';
 }
 
 async function handleSearch(e) {
@@ -206,11 +206,14 @@ async function handleSearch(e) {
                 titleLink.textContent = link.textContent;
                 
                 titleLink.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    if (isBlocked(realUrl)) return alert('Content blocked by AdBlock');
-                    elements.embedUrl.value = realUrl;
-                    embed();
-                    hideElement(elements.searchResults);
+                e.preventDefault();
+                if (isBlocked(realUrl)) {
+                alert('Content blocked by AdBlock');
+                return;
+                }
+                elements.embedUrl.value = realUrl;
+                embed(); // Trigger the embed immediately
+                hideElement(elements.searchResults);
                 });
 
                 const copyButton = document.createElement('button');
