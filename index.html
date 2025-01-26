@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" 
-      content="default-src 'self'; script-src 'unsafe-inline' 'self'; style-src 'self' 'unsafe-inline'">
+          content="default-src 'self'; 
+                   script-src 'unsafe-inline' 'self'; 
+                   style-src 'self' 'unsafe-inline'; 
+                   frame-src *;">
     <title>Nick's Embeds</title>
     <link rel="stylesheet" href="style.css">
 
@@ -40,7 +43,7 @@
             <button id="embedButton">Embed</button>
             <button id="saveButton">Save Embed</button>
             <input type="text" id="embedTitle" placeholder="Custom title (optional)">
-            <div class="note">Saved embeds persist between sessions</div>
+            <div class="note">Saved embeds persist between sessions. Some sites block embedding - <a href="#" id="proxyHelp">toggle proxy mode</a></div>
         </div>
 
         <div class="embed-container" id="embedContainer"></div>
