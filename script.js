@@ -108,7 +108,7 @@ try {
         if (isBlocked(url)) return alert('Content blocked by AdBlock');
         
         // === Add proxy code here ===
-        const proxyUrl = `https://nicks-embeds.vercel.app=${encodeURIComponent(url)}`;
+        const proxyUrl = `https://nicks-embeds.vercel.app/?=${encodeURIComponent(url)}`;
         const iframe = document.createElement('iframe');
         iframe.src = proxyUrl;
         iframe.sandbox = "allow-scripts allow-same-origin allow-forms allow-popups allow-presentation";
