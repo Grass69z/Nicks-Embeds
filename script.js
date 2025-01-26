@@ -91,6 +91,7 @@ function isBlocked(url) {
            config.adBlock.blockedPaths.some(p => pathname.includes(p));
 }
 
+// Replace the existing embed() function with:
 function embed() {
     showElement(elements.embedContainer);
     hideElement(elements.searchResults);
