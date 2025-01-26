@@ -35,11 +35,11 @@ function initApp() {
 }
 
 function addEventListeners() {
-    elements.embedButton.addEventListener('click', embedGame);
+    elements.embedButton.addEventListener('click', embed);
     elements.saveButton.addEventListener('click', saveEmbed);
     elements.adblockToggle.addEventListener('click', toggleAdBlock);
     elements.darkModeToggle.addEventListener('click', toggleDarkMode);
-    elements.gameUrl.addEventListener('keypress', e => e.key === 'Enter' && embedGame());
+    elements.embedUrl.addEventListener('keypress', e => e.key === 'Enter' && embed());
     elements.ddgSearchForm.addEventListener('submit', handleSearch);
 }
 
@@ -74,11 +74,11 @@ function isBlocked(url) {
            config.adBlock.blockedPaths.some(p => pathname.includes(p));
 }
 
-function embedGame() {
-    showElement(elements.gameContainer);
+function embed() {
+    showElement(elements.embedContainer);
     hideElement(elements.searchResults);
     
-    const url = elements.gameUrl.value;
+    const url = elements.embedUrl.value;
     if (!url) return alert('Please enter a URL');
 
     try {
@@ -95,15 +95,15 @@ function embedGame() {
         fullscreenBtn.innerHTML = '⛶';
         fullscreenBtn.onclick = toggleFullscreen;
 
-        elements.gameContainer.innerHTML = '';
-        elements.gameContainer.appendChild(iframe);
-        elements.gameContainer.appendChild(fullscreenBtn);
+        elements.embedContainer.innerHTML = '';
+        elements.embedContainer.appendChild(iframe);
+        elements.embedContainer.appendChild(fullscreenBtn);
 
         // Add resize observer for centering
         const resizeObserver = new ResizeObserver(() => {
             iframe.style.margin = 'auto';
         });
-        resizeObserver.observe(elements.gameContainer);
+        resizeObserver.observe(elements.embedContainer);
 
         document.addEventListener('fullscreenchange', updateFullscreenButton);
 
@@ -114,7 +114,7 @@ function embedGame() {
 
 function toggleFullscreen() {
     if (!document.fullscreenElement) {
-        elements.gameContainer.requestFullscreen().catch(err => {
+        elements.embedContainer.requestFullscreen().catch(err => {
             alert(`Fullscreen error: ${err.message}`);
         });
     } else {
@@ -134,7 +134,7 @@ async function handleSearch(e) {
 
     try {
         showElement(elements.searchResults);
-        hideElement(elements.gameContainer);
+        hideElement(elements.embedContainer);
         
         const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://duckduckgo.com/html/?q=${query}`)}`;
         const response = await fetch(proxyUrl);
