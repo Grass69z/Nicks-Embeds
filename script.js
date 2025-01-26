@@ -8,9 +8,11 @@ const config = {
             'googletagmanager.com', 'facebook.net', 'analytics.google.com',
             'hotjar.com', 'adsrvr.org', 'adnxs.com'
         ],
-        blockedPaths: ['/ad', '/ads', '/track', '/analytics']
+        blockedPaths: ['/ad', '/ads', '/track', '/analytics'],
+        whitelist: ['youtube.com', 'wikipedia.org', 'github.com', 'netlify.app']
     },
-    darkMode: localStorage.getItem('darkModeEnabled') === 'true'
+    darkMode: localStorage.getItem('darkModeEnabled') === 'true',
+    useProxy: localStorage.getItem('useProxy') === 'true'
 };
 
 let savedEmbeds = JSON.parse(localStorage.getItem('savedEmbeds')) || [];
@@ -26,7 +28,8 @@ const elements = {
     saveButton: document.getElementById('saveButton'),
     embedTitle: document.getElementById('embedTitle'),
     ddgSearchForm: document.getElementById('ddgSearchForm'),
-    ddgSearchInput: document.getElementById('ddgSearchInput')
+    ddgSearchInput: document.getElementById('ddgSearchInput'),
+    proxyHelp: document.getElementById('proxyHelp')
 };
 
 function initApp() {
@@ -43,6 +46,7 @@ function addEventListeners() {
     elements.darkModeToggle.addEventListener('click', toggleDarkMode);
     elements.embedUrl.addEventListener('keypress', e => e.key === 'Enter' && embed());
     elements.ddgSearchForm.addEventListener('submit', handleSearch);
+    elements.proxyHelp.addEventListener('click', toggleProxy);
 }
 
 function toggleDarkMode() {
@@ -64,6 +68,13 @@ function toggleAdBlock() {
     elements.adblockToggle.classList.toggle('active', config.adBlock.enabled);
 }
 
+function toggleProxy(e) {
+    e.preventDefault();
+    config.useProxy = !config.useProxy;
+    localStorage.setItem('useProxy', config.useProxy);
+    alert(`Proxy mode ${config.useProxy ? 'enabled' : 'disabled'}`);
+}
+
 function updateAdBlockToggle() {
     elements.adblockToggle.textContent = `AdBlock: ${config.adBlock.enabled ? 'ON' : 'OFF'}`;
     elements.adblockToggle.classList.toggle('active', config.adBlock.enabled);
@@ -72,6 +83,10 @@ function updateAdBlockToggle() {
 function isBlocked(url) {
     if (!config.adBlock.enabled) return false;
     const { hostname, pathname } = new URL(url);
+    
+    // Check whitelist first
+    if (config.adBlock.whitelist.some(d => hostname.includes(d))) return false;
+    
     return config.adBlock.blockedDomains.some(d => hostname.includes(d)) ||
            config.adBlock.blockedPaths.some(p => pathname.includes(p));
 }
@@ -91,8 +106,14 @@ function embed() {
 
     try {
         if (isBlocked(url)) return alert('Content blocked by AdBlock');
+        
+        const finalUrl = config.useProxy 
+            ? `https://corsproxy.io/?${encodeURIComponent(url)}`
+            : url;
+
         const iframe = document.createElement('iframe');
-        iframe.src = url;
+        iframe.src = finalUrl;
+        iframe.sandbox = "allow-scripts allow-same-origin allow-forms allow-popups allow-presentation";
         iframe.allow = "fullscreen";
         iframe.style.width = "100%";
         iframe.style.height = "100%";
@@ -113,6 +134,18 @@ function embed() {
         resizeObserver.observe(elements.embedContainer);
 
         document.addEventListener('fullscreenchange', updateFullscreenButton);
+
+        // Error handling
+        iframe.onload = () => {
+            try {
+                if (iframe.contentWindow.length === 0 || 
+                    iframe.contentDocument.body.innerHTML.includes("blocked")) {
+                    alert("Website refuses to be embedded");
+                }
+            } catch (e) {
+                console.log("Embed check error:", e);
+            }
+        };
 
     } catch {
         alert('Invalid URL');
