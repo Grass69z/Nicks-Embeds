@@ -104,15 +104,15 @@ function embed() {
         elements.embedUrl.value = url;
     }
 
-    try {
+try {
         if (isBlocked(url)) return alert('Content blocked by AdBlock');
         
-        const finalUrl = config.useProxy 
-            ? `https://corsproxy.io/?${encodeURIComponent(url)}`
-            : url;
-
+        // === Add proxy code here ===
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
         const iframe = document.createElement('iframe');
-        iframe.src = finalUrl;
+        iframe.src = proxyUrl;
+        // === End proxy code ===
+
         iframe.sandbox = "allow-scripts allow-same-origin allow-forms allow-popups allow-presentation";
         iframe.allow = "fullscreen";
         iframe.style.width = "100%";
