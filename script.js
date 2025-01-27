@@ -24,12 +24,12 @@ const elements = {
     savedList: document.getElementById('savedList'),
     adblockToggle: document.getElementById('adblockToggle'),
     darkModeToggle: document.getElementById('darkModeToggle'),
-    embedButton: document.getElementById('embedButton'), // Must match HTML
-    saveButton: document.getElementById('saveButton'), // Must match HTML
+    embedButton: document.getElementById('embedButton'),
+    saveButton: document.getElementById('saveButton'),
     embedTitle: document.getElementById('embedTitle'),
     ddgSearchForm: document.getElementById('ddgSearchForm'),
-    ddgSearchInput: document.getElementById('ddgSearchInput')
-    proxyHelp: document.getElementById('proxyHelp')  // Add this line
+    ddgSearchInput: document.getElementById('ddgSearchInput'),
+    proxyHelp: document.getElementById('proxyHelp') // FIXED HERE
 };
 
 function initApp() {
@@ -46,7 +46,7 @@ function addEventListeners() {
     elements.darkModeToggle.addEventListener('click', toggleDarkMode);
     elements.embedUrl.addEventListener('keypress', e => e.key === 'Enter' && embed());
     elements.ddgSearchForm.addEventListener('submit', handleSearch);
-    elements.proxyHelp.addEventListener('click', toggleProxy);
+    elements.proxyHelp.addEventListener('click', toggleProxy); // FIXED HERE
 }
 
 function toggleDarkMode() {
