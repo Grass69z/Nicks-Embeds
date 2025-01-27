@@ -9,9 +9,17 @@ app.use(cors());
 
 // Proxy middleware
 app.use('/', (req, res, next) => {
-    const targetUrl = req.query.url; // Get the URL from the query parameter
-    if (!targetUrl) {
-        return res.status(400).send('URL parameter is required');
+    const targetUrl = req.query.url;
+    
+    // Validate URL
+    if (!targetUrl) return res.status(400).send('URL parameter required');
+    if (!/^https?:\/\//i.test(targetUrl)) return res.status(400).send('Invalid protocol');
+    
+    // Block sensitive domains
+    const blockedDomains = ['localhost', '127.0.0.1', '::1', 'internal.api'];
+    const hostname = new URL(targetUrl).hostname;
+    if (blockedDomains.includes(hostname)) {
+        return res.status(403).send('Blocked domain');
     }
 
     // Create the proxy middleware for the target URL
