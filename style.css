@@ -1,3 +1,32 @@
+.search-result {
+    margin: 15px 0;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.search-result a {
+    color: #1a0dab;
+    text-decoration: none;
+    font-size: 1.1em;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.search-result a:hover {
+    text-decoration: underline;
+}
+
+.snippet {
+    color: #545454;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.no-results {
+    color: #888;
+    text-align: center;
+    padding: 20px;
+}
 /* Add to top of file */
 * {
     transition: background-color 0.3s ease, color 0.3s ease;
