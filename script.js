@@ -99,52 +99,50 @@ function embed() {
     if (!url) return alert('Please enter a URL');
 
     // Auto-add https:// if missing
-    try {
-        new URL(url);
-    } catch {
-        if (!/^https?:\/\//i.test(url)) {
-            url = `https://${url}`;
-            elements.embedUrl.value = url;
-        }
+    if (!/^https?:\/\//i.test(url)) {
+        url = `https://${url}`;
+        elements.embedUrl.value = url;
     }
 
-    if (isBlocked(url)) return alert('Content blocked by AdBlock');
+    try {
+        if (isBlocked(url)) return alert('Content blocked by AdBlock');
+        
+        // Use your Vercel proxy
+        const proxyUrl = `https://nicks-embeds.vercel.app/?url=${encodeURIComponent(url)}`;
+        const iframe = document.createElement('iframe');
+        iframe.src = proxyUrl;
+        iframe.sandbox = "allow-scripts allow-same-origin allow-forms allow-popups allow-presentation";
+        iframe.allow = "fullscreen";
+        iframe.style.width = "100%";
+        iframe.style.height = "100%";
+        iframe.style.border = "none";
+        
+        // Clear previous embed and add new one
+        elements.embedContainer.innerHTML = '';
+        elements.embedContainer.appendChild(iframe);
 
-    // Create iframe and fullscreen button
-    elements.embedContainer.innerHTML = '';
-    const iframe = document.createElement('iframe');
-    const fullscreenBtn = document.createElement('button');
-    
-    // Use proxy if enabled
-    const finalUrl = config.useProxy 
-        ? `https://nicks-embeds.vercel.app/?url=${encodeURIComponent(url)}`
-        : url;
+        // Add fullscreen button
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'fullscreen-btn';
+        fullscreenBtn.innerHTML = '⛶';
+        fullscreenBtn.onclick = toggleFullscreen;
+        elements.embedContainer.appendChild(fullscreenBtn);
 
-    iframe.src = finalUrl;
-    iframe.sandbox = "allow-scripts allow-same-origin allow-forms allow-popups allow-presentation";
-    iframe.allow = "fullscreen";
-    iframe.style.width = "100%";
-    iframe.style.height = "100%";
-    iframe.style.border = "none";
-
-    fullscreenBtn.className = 'fullscreen-btn';
-    fullscreenBtn.innerHTML = '⛶';
-    fullscreenBtn.onclick = toggleFullscreen;
-
-    elements.embedContainer.appendChild(iframe);
-    elements.embedContainer.appendChild(fullscreenBtn);
-
-    // Error handling
-    iframe.onerror = () => alert('Failed to load content');
-    iframe.onload = () => {
-        try {
-            if (iframe.contentDocument?.body?.innerHTML.includes("blocked")) {
-                alert("Website refuses to be embedded");
+        // Error handling
+        iframe.onload = () => {
+            try {
+                if (iframe.contentWindow.length === 0 || 
+                    iframe.contentDocument.body.innerHTML.includes("blocked")) {
+                    alert("Website refuses to be embedded");
+                }
+            } catch (e) {
+                console.log("Embed check error:", e);
             }
-        } catch (e) {
-            console.log("Embed check error:", e);
-        }
-    };
+        };
+
+    } catch {
+        alert('Invalid URL');
+    }
 }
 
 function toggleFullscreen() {
