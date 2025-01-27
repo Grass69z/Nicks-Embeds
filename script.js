@@ -29,6 +29,7 @@ const elements = {
     embedTitle: document.getElementById('embedTitle'),
     ddgSearchForm: document.getElementById('ddgSearchForm'),
     ddgSearchInput: document.getElementById('ddgSearchInput')
+    proxyHelp: document.getElementById('proxyHelp')  // Add this line
 };
 
 function initApp() {
@@ -97,22 +98,24 @@ function embed() {
     let url = elements.embedUrl.value.trim();
     if (!url) return alert('Please enter a URL');
 
-    // URL validation
+    // Auto-add https:// if missing
     try {
         new URL(url);
     } catch {
-        if (!/^https?:\/\//i.test(url)) url = `https://${url}`;
+        if (!/^https?:\/\//i.test(url)) {
+            url = `https://${url}`;
+            elements.embedUrl.value = url;
+        }
     }
-    elements.embedUrl.value = url;
 
     if (isBlocked(url)) return alert('Content blocked by AdBlock');
 
-    // Create iframe and fullscreen button ONCE
+    // Create iframe and fullscreen button
     elements.embedContainer.innerHTML = '';
     const iframe = document.createElement('iframe');
     const fullscreenBtn = document.createElement('button');
     
-    // Proxy handling
+    // Use proxy if enabled
     const finalUrl = config.useProxy 
         ? `https://nicks-embeds.vercel.app/?url=${encodeURIComponent(url)}`
         : url;
@@ -120,6 +123,9 @@ function embed() {
     iframe.src = finalUrl;
     iframe.sandbox = "allow-scripts allow-same-origin allow-forms allow-popups allow-presentation";
     iframe.allow = "fullscreen";
+    iframe.style.width = "100%";
+    iframe.style.height = "100%";
+    iframe.style.border = "none";
 
     fullscreenBtn.className = 'fullscreen-btn';
     fullscreenBtn.innerHTML = '⛶';
@@ -130,6 +136,15 @@ function embed() {
 
     // Error handling
     iframe.onerror = () => alert('Failed to load content');
+    iframe.onload = () => {
+        try {
+            if (iframe.contentDocument?.body?.innerHTML.includes("blocked")) {
+                alert("Website refuses to be embedded");
+            }
+        } catch (e) {
+            console.log("Embed check error:", e);
+        }
+    };
 }
 
 function toggleFullscreen() {
@@ -165,30 +180,29 @@ async function handleSearch(e) {
         elements.searchResults.innerHTML = '';
 
         doc.querySelectorAll('.result').forEach(result => {
-            const link = result.querySelector('.result__a');
+            const link = result.querySelector('.result__title a'); // Updated selector
             const snippet = result.querySelector('.result__snippet');
 
-            if (link && link.href) {
-                const resultDiv = document.createElement('div');
-                resultDiv.className = 'search-result';
+            if (!link || !link.href) return;
 
-                const url = new URL(link.href);
-                const realUrl = decodeURIComponent(url.searchParams.get('uddg') || link.href);
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'search-result';
 
-                const titleLink = document.createElement('a');
-                titleLink.href = '#';
-                titleLink.textContent = link.textContent;
-                
-                titleLink.addEventListener('click', (e) => {
+            const titleLink = document.createElement('a');
+            titleLink.href = '#';
+            titleLink.textContent = link.textContent;
+            
+            titleLink.addEventListener('click', (e) => {
                 e.preventDefault();
+                const realUrl = link.href;
                 if (isBlocked(realUrl)) {
-                alert('Content blocked by AdBlock');
-                return;
+                    alert('Content blocked by AdBlock');
+                    return;
                 }
                 elements.embedUrl.value = realUrl;
-                embed(); // Trigger the embed immediately
+                embed();
                 hideElement(elements.searchResults);
-                });
+            });
 
                 const copyButton = document.createElement('button');
                 copyButton.className = 'copy-button';
@@ -224,47 +238,29 @@ function hideElement(element) {
 }
 
 function saveEmbed() {
-    let url = elements.embedUrl.value.trim();
+    let url = elements.embedUrl.value.trim().toLowerCase().replace(/\/+$/, '');
     if (!url) return alert('No embed to save');
 
-    // Auto-add https:// if missing
-    if (!/^https?:\/\//i.test(url)) {
-        url = `https://${url}`;
-        elements.embedUrl.value = url;
+    try {
+        new URL(url);
+    } catch {
+        return alert('Invalid URL');
     }
-    
+
+    if (savedEmbeds.some(e => e.url.toLowerCase() === url)) {
+        return alert('Already saved');
+    }
+
     const title = elements.embedTitle.value || new URL(url).hostname;
-    
-    if (savedEmbeds.some(e => e.url === url)) return alert('Already saved');
-
     savedEmbeds.push({ title, url, date: new Date().toISOString() });
-    localStorage.setItem('savedEmbeds', JSON.stringify(savedEmbeds));
-    updateSavedList();
-}
-
-function updateSavedList() {
-    elements.savedList.innerHTML = savedEmbeds.map((embed, index) => `
-        <div class="saved-embed-item">
-            <span>${embed.title}</span>
-            <div>
-                <button onclick="loadEmbed(${index})">Load</button>
-                <button class="delete-btn" onclick="deleteEmbed(${index})">Delete</button>
-            </div>
-        </div>
-    `).join('');
-}
-
-function loadEmbed(index) {
-    elements.embedUrl.value = savedEmbeds[index].url;
-    embed();
-}
-
-function deleteEmbed(index) {
-    if (confirm('Delete this saved embed?')) {
-        savedEmbeds.splice(index, 1);
+    
+    try {
         localStorage.setItem('savedEmbeds', JSON.stringify(savedEmbeds));
-        updateSavedList();
+    } catch (e) {
+        console.error('LocalStorage error:', e);
     }
+    
+    updateSavedList();
 }
 
 initApp();
