@@ -219,7 +219,6 @@ async function handleSearch(e) {
                 resultDiv.appendChild(copyButton);
                 resultDiv.appendChild(snippetDiv);
                 elements.searchResults.appendChild(resultDiv);
-            })
         });
 
     } catch (error) {
