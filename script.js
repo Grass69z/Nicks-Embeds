@@ -91,6 +91,33 @@ function isBlocked(url) {
            config.adBlock.blockedPaths.some(p => pathname.includes(p));
 }
 
+function updateSavedList() {
+    elements.savedList.innerHTML = savedEmbeds
+        .map((embed, index) => `
+            <div class="saved-embed-item">
+                <span>${embed.title}</span>
+                <div>
+                    <button onclick="loadEmbed(${index})">Load</button>
+                    <button class="delete-btn" onclick="deleteEmbed(${index})">Delete</button>
+                </div>
+            </div>
+        `)
+        .join('');
+}
+
+function loadEmbed(index) {
+    elements.embedUrl.value = savedEmbeds[index].url;
+    embed(); // Load the embed immediately
+}
+
+function deleteEmbed(index) {
+    if (confirm('Delete this saved embed?')) {
+        savedEmbeds.splice(index, 1);
+        localStorage.setItem('savedEmbeds', JSON.stringify(savedEmbeds));
+        updateSavedList(); // Refresh the UI
+    }
+}
+
 function embed() {
     showElement(elements.embedContainer);
     hideElement(elements.searchResults);
