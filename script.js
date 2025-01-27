@@ -195,60 +195,46 @@ async function handleSearch(e) {
     try {
         showElement(elements.searchResults);
         hideElement(elements.embedContainer);
-        
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://duckduckgo.com/html/?q=${query}`)}`;
-        const response = await fetch(proxyUrl);
+
+        // Replace with your API Key and Search Engine ID
+        const apiKey = 'AIzaSyBD8ZXNUkO0OxeBEIBXO4J7Egg8gp1knhc';
+        const cx = 'c7f0cb08d60d542f5';
+        const url = `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(query)}&key=${apiKey}&cx=${cx}`;
+
+        const response = await fetch(url);
         const data = await response.json();
-        
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(data.contents, 'text/html');
+
         elements.searchResults.innerHTML = '';
 
-        doc.querySelectorAll('.result').forEach(result => {
-            const link = result.querySelector('.result__title a'); // Updated selector
-            const snippet = result.querySelector('.result__snippet');
+        if (data.items && data.items.length > 0) {
+            data.items.forEach(item => {
+                const resultDiv = document.createElement('div');
+                resultDiv.className = 'search-result';
 
-            if (!link || !link.href) return;
+                const titleLink = document.createElement('a');
+                titleLink.href = '#';
+                titleLink.textContent = item.title;
 
-            const resultDiv = document.createElement('div');
-            resultDiv.className = 'search-result';
-
-            const titleLink = document.createElement('a');
-            titleLink.href = '#';
-            titleLink.textContent = link.textContent;
-            
-            titleLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                const realUrl = link.href;
-                if (isBlocked(realUrl)) {
-                    alert('Content blocked by AdBlock');
-                    return;
-                }
-                elements.embedUrl.value = realUrl;
-                embed();
-                hideElement(elements.searchResults);
-            });
-
-                const copyButton = document.createElement('button');
-                copyButton.className = 'copy-button';
-                copyButton.textContent = 'Copy URL';
-                copyButton.onclick = () => {
-                    navigator.clipboard.writeText(realUrl)
-                        .then(() => alert('URL copied to clipboard!'))
-                        .catch(console.error);
-                };
+                titleLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    elements.embedUrl.value = item.link;
+                    embed();
+                    hideElement(elements.searchResults);
+                });
 
                 const snippetDiv = document.createElement('div');
                 snippetDiv.className = 'snippet';
-                snippetDiv.textContent = snippet?.textContent || '';
+                snippetDiv.textContent = item.snippet;
 
                 resultDiv.appendChild(titleLink);
-                resultDiv.appendChild(copyButton);
                 resultDiv.appendChild(snippetDiv);
                 elements.searchResults.appendChild(resultDiv);
-        });
-
+            });
+        } else {
+            elements.searchResults.innerHTML = '<div class="no-results">No results found.</div>';
+        }
     } catch (error) {
+        console.error('Search failed:', error);
         alert('Search failed. Please try again.');
     }
 }
