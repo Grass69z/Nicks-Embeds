@@ -90,7 +90,6 @@ function isBlocked(url) {
            config.adBlock.blockedPaths.some(p => pathname.includes(p));
 }
 
-// Replace the existing embed() function with:
 function embed() {
     showElement(elements.embedContainer);
     hideElement(elements.searchResults);
@@ -98,64 +97,39 @@ function embed() {
     let url = elements.embedUrl.value.trim();
     if (!url) return alert('Please enter a URL');
 
-    // Auto-add https:// if missing
-    if (!/^https?:\/\//i.test(url)) {
-        url = `https://${url}`;
-        elements.embedUrl.value = url;
-    }
-
+    // URL validation
     try {
-        if (isBlocked(url)) return alert('Content blocked by AdBlock');
-        
-        // Use your Vercel proxy
-        const proxyUrl = `https://nicks-embeds.vercel.app/?url=${encodeURIComponent(url)}`;
-        const iframe = document.createElement('iframe');
-        iframe.src = proxyUrl;
-        iframe.sandbox = "allow-scripts allow-same-origin allow-forms allow-popups allow-presentation";
-        iframe.allow = "fullscreen";
-        iframe.style.width = "100%";
-        iframe.style.height = "100%";
-        iframe.style.border = "none";
-        
-        // Clear previous embed and add new one
-        elements.embedContainer.innerHTML = '';
-        elements.embedContainer.appendChild(iframe);
+        new URL(url);
     } catch {
-        alert('Invalid URL');
+        if (!/^https?:\/\//i.test(url)) url = `https://${url}`;
     }
-}
-        
-        const fullscreenBtn = document.createElement('button');
-        fullscreenBtn.className = 'fullscreen-btn';
-        fullscreenBtn.innerHTML = '⛶';
-        fullscreenBtn.onclick = toggleFullscreen;
+    elements.embedUrl.value = url;
 
-        elements.embedContainer.innerHTML = '';
-        elements.embedContainer.appendChild(iframe);
-        elements.embedContainer.appendChild(fullscreenBtn);
+    if (isBlocked(url)) return alert('Content blocked by AdBlock');
 
-        const resizeObserver = new ResizeObserver(() => {
-            iframe.style.margin = 'auto';
-        });
-        resizeObserver.observe(elements.embedContainer);
+    // Create iframe and fullscreen button ONCE
+    elements.embedContainer.innerHTML = '';
+    const iframe = document.createElement('iframe');
+    const fullscreenBtn = document.createElement('button');
+    
+    // Proxy handling
+    const finalUrl = config.useProxy 
+        ? `https://nicks-embeds.vercel.app/?url=${encodeURIComponent(url)}`
+        : url;
 
-        document.addEventListener('fullscreenchange', updateFullscreenButton);
+    iframe.src = finalUrl;
+    iframe.sandbox = "allow-scripts allow-same-origin allow-forms allow-popups allow-presentation";
+    iframe.allow = "fullscreen";
 
-        // Error handling
-        iframe.onload = () => {
-            try {
-                if (iframe.contentWindow.length === 0 || 
-                    iframe.contentDocument.body.innerHTML.includes("blocked")) {
-                    alert("Website refuses to be embedded");
-                }
-            } catch (e) {
-                console.log("Embed check error:", e);
-            }
-        };
+    fullscreenBtn.className = 'fullscreen-btn';
+    fullscreenBtn.innerHTML = '⛶';
+    fullscreenBtn.onclick = toggleFullscreen;
 
-    } catch {
-        alert('Invalid URL');
-    }
+    elements.embedContainer.appendChild(iframe);
+    elements.embedContainer.appendChild(fullscreenBtn);
+
+    // Error handling
+    iframe.onerror = () => alert('Failed to load content');
 }
 
 function toggleFullscreen() {
