@@ -29,7 +29,10 @@ const elements = {
     embedTitle: document.getElementById('embedTitle'),
     ddgSearchForm: document.getElementById('ddgSearchForm'),
     ddgSearchInput: document.getElementById('ddgSearchInput'),
-    proxyHelp: document.getElementById('proxyHelp') // FIXED HERE
+    proxyHelp: document.getElementById('proxyHelp')
+    devConsole: document.querySelector('.dev-console'),
+    consoleOutput: document.getElementById('consoleOutput'),
+    devConsoleBtn: document.querySelector('.dev-console-btn')
 };
 
 function initApp() {
@@ -37,6 +40,7 @@ function initApp() {
     updateSavedList();
     updateAdBlockToggle();
     addEventListeners();
+    initErrorLogging();
 }
 
 function addEventListeners() {
@@ -46,7 +50,8 @@ function addEventListeners() {
     elements.darkModeToggle.addEventListener('click', toggleDarkMode);
     elements.embedUrl.addEventListener('keypress', e => e.key === 'Enter' && embed());
     elements.ddgSearchForm.addEventListener('submit', handleSearch);
-    elements.proxyHelp.addEventListener('click', toggleProxy); // FIXED HERE
+    elements.proxyHelp.addEventListener('click', toggleProxy);
+    elements.devConsoleBtn.addEventListener('click', toggleConsole);
 }
 
 function toggleDarkMode() {
@@ -107,16 +112,56 @@ function updateSavedList() {
 
 function loadEmbed(index) {
     elements.embedUrl.value = savedEmbeds[index].url;
-    embed(); // Load the embed immediately
+    embed();
 }
 
 function deleteEmbed(index) {
     if (confirm('Delete this saved embed?')) {
         savedEmbeds.splice(index, 1);
         localStorage.setItem('savedEmbeds', JSON.stringify(savedEmbeds));
-        updateSavedList(); // Refresh the UI
+        updateSavedList();
     }
 }
+
+  window.addEventListener('unhandledrejection', event => {
+        const errorEntry = {
+            timestamp: new Date().toISOString(),
+            message: `Unhandled rejection: ${event.reason}`,
+            source: 'Promise',
+            error: event.reason.stack || ''
+        };
+        errorLog.push(errorEntry);
+        updateConsoleOutput();
+    });
+}
+
+function updateConsoleOutput() {
+    elements.consoleOutput.textContent = errorLog
+        .map(entry => `[${entry.timestamp}] ${entry.message}\n${entry.error || ''}`)
+        .join('\n\n');
+    elements.consoleOutput.scrollTop = elements.consoleOutput.scrollHeight;
+}
+
+function toggleConsole() {
+    elements.devConsole.classList.toggle('open');
+}
+
+let errorLog = [];
+
+function initErrorLogging() {
+    window.onerror = function(message, source, lineno, colno, error) {
+        const errorEntry = {
+            timestamp: new Date().toISOString(),
+            message,
+            source,
+            line: lineno,
+            column: colno,
+            error: error?.stack || ''
+        };
+        errorLog.push(errorEntry);
+        updateConsoleOutput();
+        return false;
+    };
 
 function embed() {
     showElement(elements.embedContainer);
