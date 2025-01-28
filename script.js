@@ -1,3 +1,4 @@
+// Configuration
 const config = {
     adBlock: {
         enabled: localStorage.getItem('adBlockEnabled') !== 'false',
@@ -15,8 +16,7 @@ const config = {
     useProxy: localStorage.getItem('useProxy') === 'true'
 };
 
-let savedEmbeds = JSON.parse(localStorage.getItem('savedEmbeds')) || [];
-
+// DOM Elements
 const elements = {
     embedUrl: document.getElementById('embedUrl'),
     embedContainer: document.getElementById('embedContainer'),
@@ -29,12 +29,17 @@ const elements = {
     embedTitle: document.getElementById('embedTitle'),
     ddgSearchForm: document.getElementById('ddgSearchForm'),
     ddgSearchInput: document.getElementById('ddgSearchInput'),
-    proxyHelp: document.getElementById('proxyHelp')
+    proxyHelp: document.getElementById('proxyHelp'),
     devConsole: document.querySelector('.dev-console'),
     consoleOutput: document.getElementById('consoleOutput'),
     devConsoleBtn: document.querySelector('.dev-console-btn')
 };
 
+// State
+let savedEmbeds = JSON.parse(localStorage.getItem('savedEmbeds')) || [];
+let errorLog = [];
+
+// Initialization
 function initApp() {
     initDarkMode();
     updateSavedList();
@@ -43,6 +48,7 @@ function initApp() {
     initErrorLogging();
 }
 
+// Event Listeners
 function addEventListeners() {
     elements.embedButton.addEventListener('click', embed);
     elements.saveButton.addEventListener('click', saveEmbed);
@@ -54,6 +60,7 @@ function addEventListeners() {
     elements.devConsoleBtn.addEventListener('click', toggleConsole);
 }
 
+// Dark Mode
 function toggleDarkMode() {
     config.darkMode = !config.darkMode;
     localStorage.setItem('darkModeEnabled', config.darkMode);
@@ -66,18 +73,11 @@ function initDarkMode() {
     elements.darkModeToggle.textContent = config.darkMode ? '☀️' : '🌙';
 }
 
+// AdBlock
 function toggleAdBlock() {
     config.adBlock.enabled = !config.adBlock.enabled;
     localStorage.setItem('adBlockEnabled', config.adBlock.enabled);
-    elements.adblockToggle.textContent = `AdBlock: ${config.adBlock.enabled ? 'ON' : 'OFF'}`;
-    elements.adblockToggle.classList.toggle('active', config.adBlock.enabled); // Add this line
-}
-
-function toggleProxy(e) {
-    e.preventDefault();
-    config.useProxy = !config.useProxy;
-    localStorage.setItem('useProxy', config.useProxy);
-    alert(`Proxy mode ${config.useProxy ? 'enabled' : 'disabled'}`);
+    updateAdBlockToggle();
 }
 
 function updateAdBlockToggle() {
@@ -89,13 +89,21 @@ function isBlocked(url) {
     if (!config.adBlock.enabled) return false;
     const { hostname, pathname } = new URL(url);
     
-    // Check whitelist first
-    if (config.adBlock.whitelist.some(d => hostname.includes(d))) return false;
+    if (config.adBlock.whitelist.some(d => hostname.endsWith(d))) return false;
     
     return config.adBlock.blockedDomains.some(d => hostname.includes(d)) ||
            config.adBlock.blockedPaths.some(p => pathname.includes(p));
 }
 
+// Proxy
+function toggleProxy(e) {
+    e.preventDefault();
+    config.useProxy = !config.useProxy;
+    localStorage.setItem('useProxy', config.useProxy);
+    alert(`Proxy mode ${config.useProxy ? 'enabled' : 'disabled'}`);
+}
+
+// Saved Embeds
 function updateSavedList() {
     elements.savedList.innerHTML = savedEmbeds
         .map((embed, index) => `
@@ -123,46 +131,7 @@ function deleteEmbed(index) {
     }
 }
 
-  window.addEventListener('unhandledrejection', event => {
-        const errorEntry = {
-            timestamp: new Date().toISOString(),
-            message: `Unhandled rejection: ${event.reason}`,
-            source: 'Promise',
-            error: event.reason.stack || ''
-        };
-        errorLog.push(errorEntry);
-        updateConsoleOutput();
-    });
-}
-
-function updateConsoleOutput() {
-    elements.consoleOutput.textContent = errorLog
-        .map(entry => `[${entry.timestamp}] ${entry.message}\n${entry.error || ''}`)
-        .join('\n\n');
-    elements.consoleOutput.scrollTop = elements.consoleOutput.scrollHeight;
-}
-
-function toggleConsole() {
-    elements.devConsole.classList.toggle('open');
-}
-
-let errorLog = [];
-
-function initErrorLogging() {
-    window.onerror = function(message, source, lineno, colno, error) {
-        const errorEntry = {
-            timestamp: new Date().toISOString(),
-            message,
-            source,
-            line: lineno,
-            column: colno,
-            error: error?.stack || ''
-        };
-        errorLog.push(errorEntry);
-        updateConsoleOutput();
-        return false;
-    };
-
+// Embedding
 function embed() {
     showElement(elements.embedContainer);
     hideElement(elements.searchResults);
@@ -170,7 +139,6 @@ function embed() {
     let url = elements.embedUrl.value.trim();
     if (!url) return alert('Please enter a URL');
 
-    // Auto-add https:// if missing
     if (!/^https?:\/\//i.test(url)) {
         url = `https://${url}`;
         elements.embedUrl.value = url;
@@ -179,28 +147,27 @@ function embed() {
     try {
         if (isBlocked(url)) return alert('Content blocked by AdBlock');
         
-        // Use your Vercel proxy
-        const proxyUrl = `https://nicks-embeds.vercel.app/?url=${encodeURIComponent(url)}`;
+        const finalUrl = config.useProxy 
+            ? `https://nicks-embeds.vercel.app/?url=${encodeURIComponent(url)}`
+            : url;
+
         const iframe = document.createElement('iframe');
-        iframe.src = proxyUrl;
+        iframe.src = finalUrl;
         iframe.sandbox = "allow-scripts allow-same-origin allow-forms allow-popups allow-presentation";
         iframe.allow = "fullscreen";
         iframe.style.width = "100%";
         iframe.style.height = "100%";
         iframe.style.border = "none";
         
-        // Clear previous embed and add new one
         elements.embedContainer.innerHTML = '';
         elements.embedContainer.appendChild(iframe);
 
-        // Add fullscreen button
         const fullscreenBtn = document.createElement('button');
         fullscreenBtn.className = 'fullscreen-btn';
         fullscreenBtn.innerHTML = '⛶';
         fullscreenBtn.onclick = toggleFullscreen;
         elements.embedContainer.appendChild(fullscreenBtn);
 
-        // Error handling
         iframe.onload = () => {
             try {
                 if (iframe.contentWindow.length === 0 || 
@@ -212,11 +179,13 @@ function embed() {
             }
         };
 
-    } catch {
+    } catch (error) {
         alert('Invalid URL');
+        console.error('Embed error:', error);
     }
 }
 
+// Fullscreen
 function toggleFullscreen() {
     if (!document.fullscreenElement) {
         elements.embedContainer.requestFullscreen().catch(err => {
@@ -225,6 +194,7 @@ function toggleFullscreen() {
     } else {
         document.exitFullscreen();
     }
+    updateFullscreenButton();
 }
 
 function updateFullscreenButton() {
@@ -232,6 +202,7 @@ function updateFullscreenButton() {
     btn.innerHTML = document.fullscreenElement ? '⛶ Exit' : '⛶ Fullscreen';
 }
 
+// Search
 async function handleSearch(e) {
     e.preventDefault();
     const query = elements.ddgSearchInput.value.trim();
@@ -241,7 +212,6 @@ async function handleSearch(e) {
         showElement(elements.searchResults);
         hideElement(elements.embedContainer);
 
-        // Replace with your API Key and Search Engine ID
         const apiKey = 'AIzaSyBD8ZXNUkO0OxeBEIBXO4J7Egg8gp1knhc';
         const cx = 'c7f0cb08d60d542f5';
         const url = `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(query)}&key=${apiKey}&cx=${cx}`;
@@ -251,7 +221,7 @@ async function handleSearch(e) {
 
         elements.searchResults.innerHTML = '';
 
-        if (data.items && data.items.length > 0) {
+        if (data.items?.length > 0) {
             data.items.forEach(item => {
                 const resultDiv = document.createElement('div');
                 resultDiv.className = 'search-result';
@@ -284,6 +254,40 @@ async function handleSearch(e) {
     }
 }
 
+// Error Handling
+function initErrorLogging() {
+    window.onerror = (message, source, lineno, colno, error) => {
+        errorLog.push({
+            timestamp: new Date().toISOString(),
+            message,
+            source,
+            line: lineno,
+            column: colno,
+            error: error?.stack || ''
+        });
+        updateConsoleOutput();
+        return false;
+    };
+
+    window.addEventListener('unhandledrejection', event => {
+        errorLog.push({
+            timestamp: new Date().toISOString(),
+            message: `Unhandled rejection: ${event.reason}`,
+            source: 'Promise',
+            error: event.reason.stack || ''
+        });
+        updateConsoleOutput();
+    });
+}
+
+function updateConsoleOutput() {
+    elements.consoleOutput.textContent = errorLog
+        .map(entry => `[${entry.timestamp}] ${entry.message}\n${entry.error || ''}`)
+        .join('\n\n');
+    elements.consoleOutput.scrollTop = elements.consoleOutput.scrollHeight;
+}
+
+// UI Utilities
 function showElement(element) {
     element.style.display = 'block';
 }
@@ -292,6 +296,11 @@ function hideElement(element) {
     element.style.display = 'none';
 }
 
+function toggleConsole() {
+    elements.devConsole.classList.toggle('open');
+}
+
+// Save Embed
 function saveEmbed() {
     let url = elements.embedUrl.value.trim().toLowerCase().replace(/\/+$/, '');
     if (!url) return alert('No embed to save');
@@ -311,13 +320,14 @@ function saveEmbed() {
     
     try {
         localStorage.setItem('savedEmbeds', JSON.stringify(savedEmbeds));
+        updateSavedList();
     } catch (e) {
         console.error('LocalStorage error:', e);
+        alert('Failed to save embed. Storage may be full.');
     }
-    
-    updateSavedList();
 }
 
+// Initialize
 initApp();
 window.loadEmbed = loadEmbed;
 window.deleteEmbed = deleteEmbed;
