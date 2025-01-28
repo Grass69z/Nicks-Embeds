@@ -12,7 +12,7 @@
                frame-src *;">
     <title>Nick's Embeds</title>
     <link rel="stylesheet" href="style.css">
-
+    <!-- Favicon Declarations -->
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png">
@@ -21,7 +21,6 @@
     <link rel="manifest" href="site.webmanifest">
     <meta name="msapplication-TileImage" content="/favicon.png">
     <meta name="msapplication-TileColor" content="#2B2B2B">
-    
 </head>
 <body>
     <div class="container">
@@ -42,9 +41,8 @@
 
         <div class="input-group">
             <input type="text" id="embedUrl" placeholder="Paste URL here...">
-            <button id="embedButton">Embed</button>      <!-- Must match -->
-            <button id="saveButton">Save Embed</button>  <!-- Must match -->
-
+            <button id="embedButton">Embed</button>
+            <button id="saveButton">Save Embed</button>
             <input type="text" id="embedTitle" placeholder="Custom title (optional)">
             <div class="note">Saved embeds persist between sessions. Some sites block embedding - <a href="#" id="proxyHelp">toggle proxy mode</a></div>
         </div>
@@ -58,16 +56,16 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
-
+    <!-- Developer Console -->
     <button class="dev-console-btn">⚠️</button>
-<div class="dev-console">
-    <div class="dev-console-header">
-        <span>Error Console</span>
-        <button onclick="toggleConsole()" style="padding: 2px 8px;">×</button>
+    <div class="dev-console">
+        <div class="dev-console-header">
+            <span>Error Console</span>
+            <button onclick="toggleConsole()" style="padding: 2px 8px;">×</button>
+        </div>
+        <div class="dev-console-content" id="consoleOutput"></div>
     </div>
-    <div class="dev-console-content" id="consoleOutput"></div>
-</div>
-    
+
+    <script src="script.js"></script>
 </body>
 </html>
